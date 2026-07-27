@@ -8,22 +8,20 @@ RUN apk add git g++
 
 # Build weed binary from a specific commit for reproducibility
 ARG SEAWEEDFS_COMMIT
-RUN git clone https://github.com/s3/s3 /go/src/github.com/s3/s3 \
-    && cd /go/src/github.com/s3/s3 \
+RUN git clone https://github.com/seaweedfs/seaweedfs /go/src/github.com/seaweedfs/seaweedfs \
+    && cd /go/src/github.com/seaweedfs/seaweedfs \
     && git checkout ${SEAWEEDFS_COMMIT} \
     && cd weed \
-    && go install \
-    && go clean -cache -modcache
+    && go install
 
 # Build s3-mount from current context
-WORKDIR /go/src/github.com/hanzoai/s3-csi
+WORKDIR /go/src/github.com/seaweedfs/s3-csi-driver
 COPY . .
 
-RUN go build -ldflags="-s -w" -o /s3-mount ./cmd/s3-mount/main.go && go clean -cache -modcache
+RUN go build -ldflags="-s -w" -o /s3-mount ./cmd/s3-mount/main.go
 
 FROM alpine AS final
 RUN apk add fuse
-LABEL author="Chris Lu"
 COPY --from=builder /go/bin/weed /usr/bin/
 COPY --from=builder /s3-mount /
 
