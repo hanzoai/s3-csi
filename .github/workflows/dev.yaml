@@ -10,6 +10,10 @@ on:
   # Allow trigger for external PRs
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,7 +26,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            chrislusf/s3-csi
+            ghcr.io/hanzoai/s3-csi
           tags: |
             type=raw,value=dev
           flavor: |
@@ -37,7 +41,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            chrislusf/s3-mount
+            ghcr.io/hanzoai/s3-mount
           tags: |
             type=raw,value=dev
           flavor: |
@@ -66,12 +70,18 @@ jobs:
         with:
           buildkitd-flags: "--debug"
 
-      - name: Login to DockerHub
+      # GHCR, not Docker Hub. This fork inherited a login as the upstream
+      # author, so every build failed with "unauthorized: incorrect username or
+      # password" — we do not have, and should not want, chrislusf's Docker Hub
+      # token. GITHUB_TOKEN can push to this org's own registry, so the image
+      # publishes with no secret to provision.
+      - name: Login to GHCR
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          username: chrislusf
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build csi-driver image
         uses: docker/build-push-action@v6
