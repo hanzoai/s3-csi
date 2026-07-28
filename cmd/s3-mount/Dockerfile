@@ -1,16 +1,23 @@
-# S3_COMMIT should match the commit in go.mod for reproducibility
-# Update via: docker build --build-arg S3_COMMIT=<hash> ...
-ARG S3_COMMIT=6dda4e4d6bca
+# S3_REF pins the hanzoai/s3 source this image builds its `s3` binary from, and
+# it MUST track the github.com/hanzoai/s3 version in go.mod — the mount daemon
+# and the driver have to speak the same filer wire protocol as the server.
+#
+# The DEFAULT is load-bearing: our builder invokes buildkit with no --build-arg,
+# so whatever is written here is what actually ships. It was left at a bare
+# commit from before v1.0.2/v1.0.3/v1.0.4, which would have shipped a mount
+# binary carrying the promise-ID deadlock and the stream head-of-line stall
+# those releases fixed. Pin the TAG so it is legible and diffable against go.mod.
+ARG S3_REF=v1.0.4
 
 FROM golang:1.26-alpine AS builder
 
 RUN apk add git g++
 
 # Build the s3 binary from a specific commit for reproducibility
-ARG S3_COMMIT
+ARG S3_REF
 RUN git clone https://github.com/hanzoai/s3 /go/src/github.com/hanzoai/s3 \
     && cd /go/src/github.com/hanzoai/s3 \
-    && git checkout ${S3_COMMIT} \
+    && git checkout ${S3_REF} \
     && cd s3 \
     && go install \
     && go clean -cache -modcache
