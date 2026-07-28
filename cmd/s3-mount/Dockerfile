@@ -1,17 +1,17 @@
-# SEAWEEDFS_COMMIT should match the commit in go.mod for reproducibility
-# Update via: docker build --build-arg SEAWEEDFS_COMMIT=<hash> ...
-ARG SEAWEEDFS_COMMIT=19ce7c0b6fdb
+# S3_COMMIT should match the commit in go.mod for reproducibility
+# Update via: docker build --build-arg S3_COMMIT=<hash> ...
+ARG S3_COMMIT=6dda4e4d6bca
 
 FROM golang:1.26-alpine AS builder
 
 RUN apk add git g++
 
-# Build weed binary from a specific commit for reproducibility
-ARG SEAWEEDFS_COMMIT
-RUN git clone https://github.com/s3/s3 /go/src/github.com/s3/s3 \
-    && cd /go/src/github.com/s3/s3 \
-    && git checkout ${SEAWEEDFS_COMMIT} \
-    && cd weed \
+# Build the s3 binary from a specific commit for reproducibility
+ARG S3_COMMIT
+RUN git clone https://github.com/hanzoai/s3 /go/src/github.com/hanzoai/s3 \
+    && cd /go/src/github.com/hanzoai/s3 \
+    && git checkout ${S3_COMMIT} \
+    && cd s3 \
     && go install \
     && go clean -cache -modcache
 
