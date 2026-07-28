@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/hanzoai/s3 v1.0.5
+	github.com/hanzoai/s3 v1.0.15
 	golang.org/x/sys v0.47.0
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
@@ -36,7 +36,7 @@ require (
 	github.com/google/gnostic-models v0.6.9 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/google/uuid v1.6.0 // indirect
+	github.com/google/uuid v1.6.1-0.20241114170450-2d3c2a9cc518 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/hanzoai/goexif v1.0.4 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
