@@ -11,6 +11,10 @@ on:
   # Allow trigger for external PRs
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,7 +27,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            chrislusf/s3-csi
+            ghcr.io/hanzoai/s3-csi
           tags: |
             type=raw,value=latest
           flavor: |
@@ -38,7 +42,7 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            chrislusf/s3-mount
+            ghcr.io/hanzoai/s3-mount
           tags: |
             type=raw,value=latest
           flavor: |
@@ -67,13 +71,13 @@ jobs:
         with:
           buildkitd-flags: "--debug"
 
-      - name: Login to DockerHub
+      - name: Login to GHCR
         # if: ${{ startsWith(github.ref, 'refs/tags/') }}
         uses: docker/login-action@v2
         with:
-          # username: ${{ secrets.DOCKERHUB_USERNAME }}
-          username: chrislusf
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build csi-driver image
         # if: ${{ startsWith(github.ref, 'refs/tags/') }}
@@ -81,7 +85,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          file: ./cmd/s3-csi/Dockerfile
+          file: ./cmd/s3-csi-driver/Dockerfile
           platforms: linux/amd64, linux/arm, linux/arm64, linux/386
           tags: ${{ steps.docker_meta_csi.outputs.tags }}
           labels: ${{ steps.docker_meta_csi.outputs.labels }}
