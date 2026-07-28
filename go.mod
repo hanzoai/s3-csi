@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/hanzoai/s3 v1.0.4
+	github.com/hanzoai/s3 v1.0.5
 	golang.org/x/sys v0.47.0
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0

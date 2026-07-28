@@ -173,7 +173,7 @@ func (d *S3Driver) ValidateControllerServiceRequest(c csi.ControllerServiceCapab
 // single ZAP connection, so Create/Delete/Validate do not each open a socket.
 func (d *S3Driver) Filer() *filer.Client {
 	if d.zapFiler == nil {
-		d.zapFiler = filer.New(d.filers[d.filerIndex].ToGrpcAddress())
+		d.zapFiler = filer.New(d.filers[d.filerIndex].ToFilerZapAddress())
 	}
 	return d.zapFiler
 }
