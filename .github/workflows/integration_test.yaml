@@ -127,7 +127,6 @@ jobs:
                       - -dir=/data
                       - -s3
                       - -filer
-                      - -master.peers=none
                       - -volume.max=10
                       - -master.volumeSizeLimitMB=16
                     ports:
