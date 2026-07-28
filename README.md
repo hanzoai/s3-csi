@@ -1,11 +1,11 @@
-# Container Storage Interface (CSI) for SeaweedFS
+# Container Storage Interface (CSI) for S3
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/chrislusf/seaweedfs-csi-driver.svg?maxAge=4800)](https://hub.docker.com/r/chrislusf/seaweedfs-csi-driver/)
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/seaweedfs-csi-driver)](https://artifacthub.io/packages/search?repo=seaweedfs-csi-driver)
+[![Docker Pulls](https://img.shields.io/docker/pulls/chrislusf/s3-csi-driver.svg?maxAge=4800)](https://hub.docker.com/r/chrislusf/s3-csi-driver/)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/s3-csi-driver)](https://artifacthub.io/packages/search?repo=s3-csi-driver)
 
 [Container storage interface](https://kubernetes-csi.github.io/docs/) is an [industry standard](https://github.com/container-storage-interface/spec/blob/master/spec.md) that enables storage vendors to develop a plugin once and have it work across a number of container orchestration systems.
 
-[SeaweedFS](https://github.com/seaweedfs/seaweedfs) is a simple and highly scalable distributed file system, to store and serve billions of files fast!
+[S3](https://github.com/s3/s3) is a simple and highly scalable distributed file system, to store and serve billions of files fast!
 
 <br>
 
@@ -25,7 +25,7 @@
 ## Kubernetes (kubectl)
 ### Prerequisites:
 * Already have a working Kubernetes cluster (includes `kubectl`)
-* Already have a working SeaweedFS cluster
+* Already have a working S3 cluster
 
 ### Install
 
@@ -34,26 +34,26 @@
 1. Add the helm repo;
 
 ```sh
-helm repo add seaweedfs-csi-driver https://seaweedfs.github.io/seaweedfs-csi-driver/helm
+helm repo add s3-csi-driver https://s3.github.io/s3-csi-driver/helm
 ```
 
-2. Check versions by `helm repo update seaweedfs-csi-driver` and `helm search repo seaweedfs-csi-driver`
+2. Check versions by `helm repo update s3-csi-driver` and `helm search repo s3-csi-driver`
 
 #### Source
 
 1. Clone this repository 
 ```sh
-git clone https://github.com/seaweedfs/seaweedfs-csi-driver.git
+git clone https://github.com/s3/s3-csi-driver.git
 ```
 
-2. Adjust your SeaweedFS Filer address via variable SEAWEEDFS_FILER in `deploy/kubernetes/seaweedfs-csi.yaml` (2 places)
+2. Adjust your S3 Filer address via variable S3_FILER in `deploy/kubernetes/s3-csi.yaml` (2 places)
 
-3. Apply the container storage interface for SeaweedFS for your cluster.  Use the '-pre-1.17' version for any cluster pre kubernetes version 1.17.
+3. Apply the container storage interface for S3 for your cluster.  Use the '-pre-1.17' version for any cluster pre kubernetes version 1.17.
 
 ### To generate an up to date manifest from the helm chart, do:
 
 ```
-$ helm template seaweedfs ./deploy/helm/seaweedfs-csi-driver > deploy/kubernetes/seaweedfs-csi.yaml
+$ helm template s3 ./deploy/helm/s3-csi-driver > deploy/kubernetes/s3-csi.yaml
 ```
 Check the kubelet root directory ,Execute the following command
 ```
@@ -61,11 +61,11 @@ ps -ef | grep kubelet | grep root-dir
 ```
 If the result returned from the previous check command is not empty, the root directory (eg:--root-dir=/data/k8s/kubelet/data) representing the kubelet is not the default value (/var/lib/kubelet), so you need to update the kubelet root-dir in the CSI driven deployment file and deploy:
 ```
-sed 's+/var/lib/kubelet+/data/k8s/kubelet/data+g'  deploy/kubernetes/seaweedfs-csi.yaml | kubectl apply -f - 
+sed 's+/var/lib/kubelet+/data/k8s/kubelet/data+g'  deploy/kubernetes/s3-csi.yaml | kubectl apply -f - 
 ```
 If the result returned by the previous check command is null, you can directly deploy it without modifying the configuration:
 ```
-$ kubectl apply -f deploy/kubernetes/seaweedfs-csi.yaml
+$ kubectl apply -f deploy/kubernetes/s3-csi.yaml
 ```
 4. Ensure all the containers are ready and running
 ```
@@ -73,14 +73,14 @@ $ kubectl get po -n kube-system
 ```
 
 ### TLS Support
-The provided static manifest `deploy/kubernetes/seaweedfs-csi.yaml` does not include TLS configuration by default. To enable TLS, it is recommended to use [Helm](#kubernetes-helm) with `tlsSecret` configured. If you must use static manifests, you will need to manually patch the `seaweedfs-mount` and `seaweedfs-node` DaemonSets to include the necessary TLS environment variables and volume mounts.
+The provided static manifest `deploy/kubernetes/s3-csi.yaml` does not include TLS configuration by default. To enable TLS, it is recommended to use [Helm](#kubernetes-helm) with `tlsSecret` configured. If you must use static manifests, you will need to manually patch the `s3-mount` and `s3-node` DaemonSets to include the necessary TLS environment variables and volume mounts.
 
 ### Uninstall
 
 ```
 $ kubectl delete -f deploy/kubernetes/sample-busybox-pod.yaml
-$ kubectl delete -f deploy/kubernetes/sample-seaweedfs-pvc.yaml
-$ kubectl delete -f deploy/kubernetes/seaweedfs-csi.yaml
+$ kubectl delete -f deploy/kubernetes/sample-s3-pvc.yaml
+$ kubectl delete -f deploy/kubernetes/s3-csi.yaml
 ```
 
 ## Kubernetes (helm)
@@ -89,43 +89,43 @@ $ kubectl delete -f deploy/kubernetes/seaweedfs-csi.yaml
 
 1. Clone project
 ```bash
-git clone https://github.com/seaweedfs/seaweedfs-csi-driver.git
+git clone https://github.com/s3/s3-csi-driver.git
 ```
-2. Edit `./deploy/helm/seaweedfs-csi-driver/values.yaml` if required and Install
+2. Edit `./deploy/helm/s3-csi-driver/values.yaml` if required and Install
 ```bash
-helm install --set seaweedfsFiler=<filerHost:port> seaweedfs-csi-driver ./deploy/helm/seaweedfs-csi-driver
+helm install --set s3Filer=<filerHost:port> s3-csi-driver ./deploy/helm/s3-csi-driver
 ```
 Example with multiple filers :
 ```bash
-helm install seaweedfs-csi-driver ./deploy/helm/seaweedfs-csi-driver/ \
-  --namespace seaweedfs-csi-driver \
-  --set seaweedfsFiler="<filerHost:port>\,<filerHost:port>\,<filerHost:port>\,<filerHost:port>\,<filerHost:port>"
+helm install s3-csi-driver ./deploy/helm/s3-csi-driver/ \
+  --namespace s3-csi-driver \
+  --set s3Filer="<filerHost:port>\,<filerHost:port>\,<filerHost:port>\,<filerHost:port>\,<filerHost:port>"
 ```
 
 ### Uninstall
 
 ```bash
-helm uninstall seaweedfs-csi-driver
+helm uninstall s3-csi-driver
 ```
 
 # Update (Safe rollout)
-Updating seaweed-csi-driver DaemonSet (DS) will break processeses who implement fuse mount:
+Updating s3-csi-driver DaemonSet (DS) will break processeses who implement fuse mount:
 newly created pods will not remount net device.
 
 For safe update set `node.updateStrategy.type: OnDelete` for manual update. Steps:
 
-  1. delete DS pods on the node where there is no seaweedfs PV
+  1. delete DS pods on the node where there is no s3 PV
   2. cordon or taint node
-  3. evict or delete pods with seaweedfs PV
+  3. evict or delete pods with s3 PV
   4. delete DS pod on node
   5. uncordon or remove taint on node
   6. repeat all steps on [all nodes]
 
 # Testing
 
-1. Create a persistent volume claim for 5GiB with name `seaweedfs-csi-pvc` and storage class `seaweedfs-storage`. The requested size is applied as a quota to the SeaweedFS collection used by the mount.
+1. Create a persistent volume claim for 5GiB with name `s3-csi-pvc` and storage class `s3-storage`. The requested size is applied as a quota to the S3 collection used by the mount.
 ```
-$ kubectl apply -f deploy/kubernetes/sample-seaweedfs-pvc.yaml
+$ kubectl apply -f deploy/kubernetes/sample-s3-pvc.yaml
 ```
 2. Verify if the persistant volume claim exists and wait until its the STATUS is `Bound`
 ```
@@ -143,7 +143,7 @@ $ kubectl exec my-csi-app -- df -h
 # Capacity limits
 
 For dynamically provisioned volumes, `resources.requests.storage` is enforced by
-the SeaweedFS FUSE mount and reported by `df`. Once the mount observes that the
+the S3 FUSE mount and reported by `df`. Once the mount observes that the
 quota has been reached, further writes fail with `ENOSPC`. PVC expansion updates
 the mount quota.
 
@@ -151,7 +151,7 @@ The quota is collection-based and enforced by each CSI-managed mount, rather
 than stored as an authoritative server-side limit. By default, every dynamic
 volume gets its own collection, so its quota is isolated. If multiple volumes
 are configured to use the same `collection`, their usage is shared and they do
-not have independent per-directory quotas. Writes through another SeaweedFS
+not have independent per-directory quotas. Writes through another S3
 client that does not use the quota-configured mount are not restricted by this
 CSI quota.
 
@@ -174,8 +174,8 @@ It can be done via creating separate storage class with options:
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: seaweedfs-special
-provisioner: seaweedfs-csi-driver
+  name: s3-special
+provisioner: s3-csi-driver
 parameters:
   collection: mycollection
   replication: "011"
@@ -189,14 +189,14 @@ In this case we do not need additional StorageClass. We need to create Persisten
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: seaweedfs-static
+  name: s3-static
 spec:
   accessModes:
   - ReadWriteMany
   capacity:
     storage: 1Gi
   csi:
-    driver: seaweedfs-csi-driver
+    driver: s3-csi-driver
     volumeHandle: dfs-test
     volumeAttributes:
       collection: default
@@ -214,10 +214,10 @@ and bind PersistentVolumeClaim(s) to it:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: seaweedfs-static
+  name: s3-static
 spec:
   storageClassName: ""
-  volumeName: seaweedfs-static
+  volumeName: s3-static
   accessModes:
   - ReadWriteMany
   resources:
@@ -238,7 +238,7 @@ Change the type of locality
 
 Level               | Location
 ------------------- | --------
-Driver              | Helm: `values.yaml` -> `dataLocality` <br> Or `DaemonSet` -> Container `csi-seaweedfs-plugin` -> args `--dataLocality=`
+Driver              | Helm: `values.yaml` -> `dataLocality` <br> Or `DaemonSet` -> Container `csi-s3-plugin` -> args `--dataLocality=`
 StorageClass        | `parameter.dataLocality`
 PersistentVolume    | `spec.csi.volumeAttributes.dataLocality`
 

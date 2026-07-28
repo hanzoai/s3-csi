@@ -1,11 +1,11 @@
-# WWW naster: http://seaweedfs-master.service.consul:9333/
-# WWW filer: http://seaweedfs-filer.service.consul:8888/
+# WWW naster: http://s3-master.service.consul:9333/
+# WWW filer: http://s3-filer.service.consul:8888/
 
-job "seaweedfs" {
+job "s3" {
   datacenters = ["dc1"]
   type = "service"
 
-  group "seaweedfs-master" {
+  group "s3-master" {
     count = 3
 
     constraint {
@@ -49,15 +49,15 @@ job "seaweedfs" {
       }
     }
 
-    task "seaweedfs-master" {
+    task "s3-master" {
       driver = "docker"
       env {
-        WEED_MASTER_VOLUME_GROWTH_COPY_1 = "1"
-        WEED_MASTER_VOLUME_GROWTH_COPY_2 = "2"
-        WEED_MASTER_VOLUME_GROWTH_COPY_OTHER = "1"
+        S3_MASTER_VOLUME_GROWTH_COPY_1 = "1"
+        S3_MASTER_VOLUME_GROWTH_COPY_2 = "2"
+        S3_MASTER_VOLUME_GROWTH_COPY_OTHER = "1"
       }
       config {
-        image = "chrislusf/seaweedfs:latest"
+        image = "chrislusf/s3:latest"
         force_pull = "true"
         network_mode = "host"
         args = [
@@ -78,7 +78,7 @@ job "seaweedfs" {
       
       service {
         tags = ["${node.unique.name}"]
-        name = "seaweedfs-master"
+        name = "s3-master"
         port = "http"
         check {
           type = "tcp"
@@ -93,7 +93,7 @@ job "seaweedfs" {
   
   
   
-  group "seaweedfs-volume" {
+  group "s3-volume" {
     count = 3
 
     constraint {
@@ -133,12 +133,12 @@ job "seaweedfs" {
       }
     }
 
-    task "seaweedfs-volume" {
+    task "s3-volume" {
       driver = "docker"
       user = "1000:1000"
         
       config {
-        image = "chrislusf/seaweedfs:latest"
+        image = "chrislusf/s3:latest"
         force_pull = "true"
         network_mode = "host"
         args = [
@@ -146,7 +146,7 @@ job "seaweedfs" {
           "-dataCenter=${NOMAD_DC}",
 #          "-rack=${meta.rack}",
           "-rack=${node.unique.name}",
-          "-mserver=seaweedfs-master.service.consul:9333",
+          "-mserver=s3-master.service.consul:9333",
           "-port=${NOMAD_PORT_http}",
           "-ip=${NOMAD_IP_http}",
           "-publicUrl=${NOMAD_ADDR_http}",
@@ -157,7 +157,7 @@ job "seaweedfs" {
         mounts = [
           {
             type = "bind"
-            source = "/data/seaweedfs-volume-data" # there should be directory in host VM
+            source = "/data/s3-volume-data" # there should be directory in host VM
             target = "/data"
             readonly = false
             bind_options = {
@@ -175,7 +175,7 @@ job "seaweedfs" {
       
       service {
         tags = ["${node.unique.name}"]
-        name = "seaweedfs-volume"
+        name = "s3-volume"
         port = "http"
         check {
           type = "tcp"
@@ -188,7 +188,7 @@ job "seaweedfs" {
   }
 
 
-  group "seaweedfs-filer" {
+  group "s3-filer" {
     count = 1
 
     constraint {
@@ -219,12 +219,12 @@ job "seaweedfs" {
       }
     }
 
-    task "seaweedfs-filer" {
+    task "s3-filer" {
       driver = "docker"
       user = "1000:1000"
         
       config {
-        image = "chrislusf/seaweedfs:latest"
+        image = "chrislusf/s3:latest"
         force_pull = "true"
         network_mode = "host"
         args = [
@@ -233,7 +233,7 @@ job "seaweedfs" {
 #          "-rack=${meta.rack}",
           "-rack=${node.unique.name}",
           "-defaultReplicaPlacement=000",
-          "-master=seaweedfs-master.service.consul:9333",
+          "-master=s3-master.service.consul:9333",
           "-s3",
           "-ip=${NOMAD_IP_http}",
           "-port=${NOMAD_PORT_http}",
@@ -243,7 +243,7 @@ job "seaweedfs" {
           {
             type = "bind"
             source = "local/filer.toml"
-            target = "/etc/seaweedfs/filer.toml"
+            target = "/etc/s3/filer.toml"
           }
         ]
 
@@ -266,9 +266,9 @@ createTable = """
 """
 hostname = "172.21.100.54"
 port = 5432
-username = "seaweedfs"
+username = "s3"
 password = "pass1234567"
-database = "seaweedfs"
+database = "s3"
 schema = ""
 sslmode = "disable"
 connection_max_idle = 100
@@ -278,8 +278,8 @@ enableUpsert = true
 upsertQuery = """INSERT INTO "%[1]s" (dirhash,name,directory,meta) VALUES($1,$2,$3,$4) ON CONFLICT (dirhash,name) DO UPDATE SET meta = EXCLUDED.meta WHERE "%[1]s".meta != EXCLUDED.meta"""
 
 # ssh ubuntu@172.21.100.54
-# sudo -u postgres psql -c "CREATE ROLE seaweedfs WITH PASSWORD 'pass1234567';"
-# sudo -u postgres psql -c "CREATE DATABASE seaweedfs OWNER seaweedfs;"
+# sudo -u postgres psql -c "CREATE ROLE s3 WITH PASSWORD 'pass1234567';"
+# sudo -u postgres psql -c "CREATE DATABASE s3 OWNER s3;"
 EOH
       }
 
@@ -290,7 +290,7 @@ EOH
       
       service {
         tags = ["${node.unique.name}"]
-        name = "seaweedfs-filer"
+        name = "s3-filer"
         port = "http"
         check {
           type = "tcp"
@@ -302,7 +302,7 @@ EOH
       
       service {
         tags = ["${node.unique.name}"]
-        name = "seaweedfs-s3"
+        name = "s3-s3"
         port = "s3"
         check {
           type = "tcp"

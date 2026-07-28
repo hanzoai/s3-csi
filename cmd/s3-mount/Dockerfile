@@ -24,7 +24,7 @@ RUN go build -ldflags="-s -w" -o /s3-mount ./cmd/s3-mount/main.go && go clean -c
 FROM alpine AS final
 RUN apk add fuse
 LABEL org.opencontainers.image.source="https://github.com/hanzoai/s3-csi"
-COPY --from=builder /go/bin/weed /usr/bin/
+COPY --from=builder /go/bin/s3 /usr/bin/
 COPY --from=builder /s3-mount /
 
 RUN chmod +x /s3-mount

@@ -45,7 +45,7 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args :
             - --endpoint=$(CSI_ENDPOINT)
-            - --filer=$(SEAWEEDFS_FILER)
+            - --filer=$(S3_FILER)
 
             - --driverName=$(DRIVER_NAME)
             - --components=controller
@@ -53,21 +53,21 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: SEAWEEDFS_FILER
+            - name: S3_FILER
               value: {{ .Values.s3Filer | quote }}
 
             - name: DRIVER_NAME
               value: {{ .Values.driverName | quote }}
             {{- if .Values.tlsSecret }}
-            - name: WEED_GRPC_CLIENT_KEY
+            - name: S3_GRPC_CLIENT_KEY
               value: /var/run/secrets/app/tls/tls.key
-            - name: WEED_GRPC_CLIENT_CERT
+            - name: S3_GRPC_CLIENT_CERT
               value: /var/run/secrets/app/tls/tls.crt
-            - name: WEED_GRPC_CA
+            - name: S3_GRPC_CA
               value: /var/run/secrets/app/tls/ca.crt
             {{- end }}
             {{- with .Values.logVerbosity }}
-            - name: WEED_V
+            - name: S3_V
               value: {{ . | quote }}
             {{- end }}
           ports:

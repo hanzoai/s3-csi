@@ -1,13 +1,13 @@
 # id - Nomad internal ID. It is not sent to the CSI plugin but is used by Nomad for `per_alloc`
 # volume configurations, etc.
-id        = "example-seaweedfs-volume"
+id        = "example-s3-volume"
 # name - the name sent to the CSI plugin as an idempotency key and suggested volume ID. The CSI
 # spec requires the calling Container Orchestrator to respect the actual volumeId returned by the
 # CSI plugin. Nomad does this, storing it as the volume's ExternalID and using it in subsequent
 # calls to the controller and node.
-name      = "example-seaweedfs-volume"
+name      = "example-s3-volume"
 type      = "csi"
-plugin_id = "seaweedfs"
+plugin_id = "s3"
 
 capacity_min = "256GiB"
 capacity_max = "512GiB"
@@ -25,7 +25,7 @@ mount_options {
 }
 
 parameters {
-  # Available options: https://github.com/seaweedfs/seaweedfs-csi-driver/blob/master/pkg/driver/mounter_seaweedfs.go
+  # Available options: https://github.com/s3/s3-csi-driver/blob/master/pkg/driver/mounter_s3.go
   # By default, collection is the `volume ID` returned from the Create Volume gRPC call. Nomad calls this the
   # External ID of the volume. "example" here overrides that.
   collection = "example"

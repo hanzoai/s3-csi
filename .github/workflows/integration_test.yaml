@@ -178,7 +178,7 @@ jobs:
           cat deploy/kubernetes/s3-csi.yaml | \
             sed -E 's|ghcr.io/hanzoai/s3-csi:[^[:space:]]+|s3-csi:test|g' | \
             sed -E 's|chrislusf/s3-mount:[^[:space:]]+|s3-mount:test|g' | \
-            sed 's|SEAWEEDFS_FILER:8888|s3.s3.svc.cluster.local:8888|g' | \
+            sed 's|S3_FILER:8888|s3.s3.svc.cluster.local:8888|g' | \
             kubectl apply -f -
           
           # Wait for CSI driver pods to be ready (fail fast if they don't start)
@@ -265,11 +265,11 @@ jobs:
           
           echo "PASS: Functional test passed"
 
-      - name: Test weed mount crash recovery (issue #261)
+      - name: Test s3 mount crash recovery (issue #261)
         run: |
           # Reproduce the scenario from
           # https://github.com/hanzoai/s3-csi/issues/261:
-          # weed mount processes exit on their own (e.g. after a filer
+          # s3 mount processes exit on their own (e.g. after a filer
           # outage they cannot ride out). Their wait() handler runs
           # kubeMounter.Unmount on the staging path, so by the time the
           # CSI driver's health monitor sweep notices, getMountDevice
@@ -293,24 +293,24 @@ jobs:
           LOG_BASELINE=$(kubectl logs "$CSI_NODE_POD" -c csi-s3-plugin 2>/dev/null | wc -l)
           echo "CSI node log baseline: $LOG_BASELINE lines"
 
-          # Kill the weed mount child process(es) inside the mount service
+          # Kill the s3 mount child process(es) inside the mount service
           # pod, but not the mount service itself. This is what kvaster
-          # observed in production: a transient filer outage causes weed
+          # observed in production: a transient filer outage causes s3
           # mount to give up and exit, while the mount service stays up.
           # Fail loudly if there is nothing to kill — otherwise the test
           # would silently degrade into a no-op that always passes.
           MOUNT_POD=$(kubectl get pod -l app=s3-mount -o jsonpath='{.items[0].metadata.name}')
-          echo "Killing weed mount processes inside $MOUNT_POD..."
-          # Match by exact process name "weed" (the weed mount children), not
+          echo "Killing s3 mount processes inside $MOUNT_POD..."
+          # Match by exact process name "s3" (the mount children), not
           # via pgrep -f, which would match our own shell — its argv contains
           # the search pattern, so kill -9 $pids would also kill the shell
           # running this command and terminate kubectl exec with code 137.
           # The mount service itself runs as "s3-mount" so it is not a
-          # target; "weed" only appears for the FUSE child processes.
-          KILL_OUTPUT=$(kubectl exec "$MOUNT_POD" -- sh -c 'pids=$(pgrep -x weed || true); if [ -n "$pids" ]; then echo "killing pids: $pids"; kill -9 $pids && echo "killed"; else echo "no weed mount pids found"; fi' 2>&1)
+          # target; "s3" only appears for the FUSE child processes.
+          KILL_OUTPUT=$(kubectl exec "$MOUNT_POD" -- sh -c 'pids=$(pgrep -x s3 || true); if [ -n "$pids" ]; then echo "killing pids: $pids"; kill -9 $pids && echo "killed"; else echo "no s3 mount pids found"; fi' 2>&1)
           echo "$KILL_OUTPUT"
           if ! echo "$KILL_OUTPUT" | grep -q "^killed$"; then
-            echo "FAIL: no weed mount processes were running, cannot exercise recovery"
+            echo "FAIL: no s3 mount processes were running, cannot exercise recovery"
             echo "--- mount service ps ---"
             kubectl exec "$MOUNT_POD" -- ps -ef || true
             exit 1
@@ -373,7 +373,7 @@ jobs:
 
           if [ "$PASSED" -ne 1 ]; then
             if [ "$EVER_BROKEN" -eq 0 ] && [ "$RECOVERY_LOGGED" -eq 0 ]; then
-              echo "FAIL: weed mount was killed but neither breakage nor recovery activity was observed within $((ATTEMPTS * 5))s — recovery may not have triggered"
+              echo "FAIL: s3 mount was killed but neither breakage nor recovery activity was observed within $((ATTEMPTS * 5))s — recovery may not have triggered"
             else
               echo "FAIL: recovery did not converge within $((ATTEMPTS * 5))s (broken_observed=$EVER_BROKEN, recovery_logged=$RECOVERY_LOGGED)"
             fi
@@ -391,7 +391,7 @@ jobs:
           # an empty bare directory left behind by an aborted recovery.
           kubectl exec test-pod -- sh -c 'echo "after-crash" > /data/post_crash.txt'
           kubectl exec test-pod -- cat /data/post_crash.txt | grep "after-crash"
-          echo "PASS: weed mount crash recovery test passed"
+          echo "PASS: s3 mount crash recovery test passed"
 
       - name: Test mount service restart recovery
         continue-on-error: true
@@ -419,7 +419,7 @@ jobs:
           echo "CSI node log baseline: $LOG_BASELINE lines"
 
           # Restart the mount service DaemonSet pod. This kills all
-          # weed mount FUSE processes, leaving stale mounts.
+          # s3 mount FUSE processes, leaving stale mounts.
           MOUNT_POD=$(kubectl get pod -l app=s3-mount -o name)
           echo "Deleting mount service pod: $MOUNT_POD"
           kubectl delete $MOUNT_POD --grace-period=0 --force 2>/dev/null || true

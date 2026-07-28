@@ -1,9 +1,9 @@
-# Example of using seaweedfs with HashiCorp Nomad
+# Example of using s3 with HashiCorp Nomad
 
 
-## Running seaweedfs cluster
+## Running s3 cluster
 
-You can skip this part if you have already running seaweedfs.
+You can skip this part if you have already running s3.
 
 Assumptions:
  - Running Nomad cluster
@@ -14,24 +14,24 @@ Assumptions:
 ```shell
 export NOMAD_ADDR=http://nomad.service.consul:4646
 
-nomad run seaweedfs.hcl
+nomad run s3.hcl
 ```
 
-Seaweedfs master will be available on http://seaweedfs-master.service.consul:9333/
+S3 master will be available on http://s3-master.service.consul:9333/
 
-Seaweedfs filer will be available on http://seaweedfs-filer.service.consul:8888/
+S3 filer will be available on http://s3-filer.service.consul:8888/
 
 
 ## Running CSI
 
 The CSI driver is split into two components that register under the same
-`csi_plugin` id (`seaweedfs`):
+`csi_plugin` id (`s3`):
 
- - **controller** (`seaweedfs-csi-controller.hcl`) — a single `service` job that
+ - **controller** (`s3-csi-controller.hcl`) — a single `service` job that
    implements the volume lifecycle RPCs. Nomad calls it for `nomad volume create`
    / `nomad volume delete`. It only talks to the filer.
- - **node** (`seaweedfs-csi.hcl`) — a `system` job that runs on every worker and
-   stages/publishes volumes into allocations, using the `seaweedfs-mount`
+ - **node** (`s3-csi.hcl`) — a `system` job that runs on every worker and
+   stages/publishes volumes into allocations, using the `s3-mount`
    sidecar over a shared unix socket.
 
 You need **both** running. With only the node plugin, `nomad volume create`
@@ -41,20 +41,20 @@ fails with `plugin has no controller`.
 export NOMAD_ADDR=http://nomad.service.consul:4646
 
 # Start CSI controller (one instance) and node (one per worker)
-nomad run seaweedfs-csi-controller.hcl
-nomad run seaweedfs-csi.hcl
+nomad run s3-csi-controller.hcl
+nomad run s3-csi.hcl
 
 # Wait until the plugin reports a healthy controller and the expected node count
-nomad plugin status seaweedfs
+nomad plugin status s3
 
 # Create volume
-nomad volume create example-seaweedfs-volume.hcl
+nomad volume create example-s3-volume.hcl
 
 # Start sample app
-nomad run example-seaweedfs-app.hcl
+nomad run example-s3-app.hcl
 ```
 
 > If you only run the node plugin (no controller), you cannot `nomad volume
-> create`. Instead, pre-create the bucket/directory in SeaweedFS yourself and
-> `nomad volume register example-seaweedfs-volume.hcl` to register the existing
+> create`. Instead, pre-create the bucket/directory in S3 yourself and
+> `nomad volume register example-s3-volume.hcl` to register the existing
 > volume.

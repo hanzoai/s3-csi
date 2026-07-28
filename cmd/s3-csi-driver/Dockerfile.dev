@@ -2,18 +2,18 @@ FROM golang:1.24-alpine as builder
 
 RUN apk add git g++
 
-RUN mkdir -p /go/src/github.com/seaweedfs/
-RUN git clone https://github.com/seaweedfs/seaweedfs /go/src/github.com/seaweedfs/seaweedfs
-RUN cd /go/src/github.com/seaweedfs/seaweedfs/weed && go install
+RUN mkdir -p /go/src/github.com/s3/
+RUN git clone https://github.com/s3/s3 /go/src/github.com/s3/s3
+RUN cd /go/src/github.com/s3/s3/s3 && go install
 
-WORKDIR /go/src/github.com/seaweedfs/s3-csi-driver
+WORKDIR /go/src/github.com/s3/s3-csi-driver
 COPY . .
-RUN cd /go/src/github.com/seaweedfs/s3-csi-driver && go build -ldflags="-s -w" -o /s3-csi-driver ./cmd/s3-csi-driver/main.go
+RUN cd /go/src/github.com/s3/s3-csi-driver && go build -ldflags="-s -w" -o /s3-csi-driver ./cmd/s3-csi-driver/main.go
 
 FROM alpine AS final
 RUN apk add fuse
 LABEL org.opencontainers.image.source="https://github.com/hanzoai/s3-csi"
-COPY --from=builder /go/bin/weed /usr/bin/
+COPY --from=builder /go/bin/s3 /usr/bin/
 COPY --from=builder /s3-csi-driver /
 
 RUN chmod +x /s3-csi-driver

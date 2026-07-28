@@ -2,7 +2,7 @@ name: Prepare release
 
 # Automates the manual release steps:
 #   1. (optional) go get -u github.com/s3/s3 + go mod tidy
-#      and sync the Dockerfile SEAWEEDFS_COMMIT pins
+#      and sync the Dockerfile S3_COMMIT pins
 #   2. bump `version` (chart) and `appVersion` in the Helm Chart.yaml
 #   3. run the build + tests
 #   4. commit the changes to master
@@ -80,15 +80,15 @@ jobs:
           go get -u github.com/s3/s3@latest
           go mod tidy
           NEW=$(grep 'github.com/s3/s3 ' go.mod | grep -v module | awk '{print $2}')
-          echo "SEAWEEDFS_OLD=$OLD" >> "$GITHUB_ENV"
-          echo "SEAWEEDFS_NEW=$NEW" >> "$GITHUB_ENV"
+          echo "S3_OLD=$OLD" >> "$GITHUB_ENV"
+          echo "S3_NEW=$NEW" >> "$GITHUB_ENV"
           echo "S3: $OLD -> $NEW"
 
           # Keep the Dockerfile commit pins in sync with go.mod (mirrors sync-s3.yaml).
           COMMIT=$(echo "$NEW" | sed 's/.*-//')
-          sed -i "s/^ARG SEAWEEDFS_COMMIT=.*/ARG SEAWEEDFS_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile
-          sed -i "s/^ARG SEAWEEDFS_COMMIT=.*/ARG SEAWEEDFS_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile.dev
-          grep "ARG SEAWEEDFS_COMMIT=" cmd/s3-mount/Dockerfile cmd/s3-mount/Dockerfile.dev
+          sed -i "s/^ARG S3_COMMIT=.*/ARG S3_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile
+          sed -i "s/^ARG S3_COMMIT=.*/ARG S3_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile.dev
+          grep "ARG S3_COMMIT=" cmd/s3-mount/Dockerfile cmd/s3-mount/Dockerfile.dev
 
       - name: Compute new versions
         id: versions
@@ -176,9 +176,9 @@ jobs:
           git push origin "$TAG"
 
           NOTES="Helm chart \`${{ steps.versions.outputs.new_chart }}\`, app version \`${TAG}\`."
-          if [ -n "${SEAWEEDFS_NEW:-}" ] && [ "${SEAWEEDFS_OLD:-}" != "${SEAWEEDFS_NEW:-}" ]; then
-            NOTES="${NOTES}"$'\n\n'"S3 dependency: \`${SEAWEEDFS_OLD}\` → \`${SEAWEEDFS_NEW}\`"
-            NOTES="${NOTES}"$'\n'"https://github.com/s3/s3/compare/${SEAWEEDFS_OLD}...${SEAWEEDFS_NEW}"
+          if [ -n "${S3_NEW:-}" ] && [ "${S3_OLD:-}" != "${S3_NEW:-}" ]; then
+            NOTES="${NOTES}"$'\n\n'"S3 dependency: \`${S3_OLD}\` → \`${S3_NEW}\`"
+            NOTES="${NOTES}"$'\n'"https://github.com/s3/s3/compare/${S3_OLD}...${S3_NEW}"
           fi
 
           # Create the release from the tag just pushed; fires `release: published`

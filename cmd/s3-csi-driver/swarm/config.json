@@ -1,7 +1,7 @@
 
 {
-  "description": "SeaweedFS csi-driver plugin for Docker",
-  "documentation": "https://github.com/seaweedfs/seaweedfs-csi-driver",
+  "description": "S3 csi-driver plugin for Docker",
+  "documentation": "https://github.com/s3/s3-csi-driver",
   "entrypoint": ["/entrypoint.sh"],
   "env": [
     {
@@ -68,7 +68,7 @@
     }
   ],
   "interface": {
-    "socket": "seaweed.sock",
+    "socket": "s3.sock",
     "types": ["docker.csicontroller/1.0", "docker.csinode/1.0"]
   },
   "linux": {

@@ -62,11 +62,11 @@ jobs:
           echo "Updating Dockerfiles to commit: $COMMIT"
           
           # Update both Dockerfiles with the new commit hash
-          sed -i "s/^ARG SEAWEEDFS_COMMIT=.*/ARG SEAWEEDFS_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile
-          sed -i "s/^ARG SEAWEEDFS_COMMIT=.*/ARG SEAWEEDFS_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile.dev
+          sed -i "s/^ARG S3_COMMIT=.*/ARG S3_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile
+          sed -i "s/^ARG S3_COMMIT=.*/ARG S3_COMMIT=$COMMIT/" cmd/s3-mount/Dockerfile.dev
           
           # Show the changes
-          grep "ARG SEAWEEDFS_COMMIT" cmd/s3-mount/Dockerfile cmd/s3-mount/Dockerfile.dev
+          grep "ARG S3_COMMIT" cmd/s3-mount/Dockerfile cmd/s3-mount/Dockerfile.dev
 
       - name: Check for changes
         id: check_changes

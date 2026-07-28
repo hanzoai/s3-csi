@@ -1,10 +1,10 @@
-job "example-seaweedfs-app" {
+job "example-s3-app" {
   datacenters = ["dc1"]
 
   group "apps" {
-    volume "example-seaweedfs-volume" {
+    volume "example-s3-volume" {
       type            = "csi"
-      source          = "example-seaweedfs-volume"
+      source          = "example-s3-volume"
       access_mode     = "multi-node-multi-writer"
       attachment_mode = "file-system"
     }
@@ -24,7 +24,7 @@ job "example-seaweedfs-app" {
       }
 
       volume_mount {
-        volume = "example-seaweedfs-volume"
+        volume = "example-s3-volume"
         destination = "/mnt/pv"
       }
     }

@@ -6,13 +6,13 @@
 #
 # The controller only talks to the filer (it creates/removes the bucket or
 # directory backing the volume), so unlike the node plugin it does NOT need the
-# seaweedfs-mount sidecar, host volumes, bidirectional mount propagation, or
+# s3-mount sidecar, host volumes, bidirectional mount propagation, or
 # privileged mode. A single instance is enough; run it as a `service` job.
 #
-# The csi_plugin.id ("seaweedfs") MUST match the id used by the node job
-# (seaweedfs-csi.hcl) so Nomad treats them as one logical plugin with both a
+# The csi_plugin.id ("s3") MUST match the id used by the node job
+# (s3-csi.hcl) so Nomad treats them as one logical plugin with both a
 # controller and nodes.
-job "seaweedfs-csi-controller" {
+job "s3-csi-controller" {
   datacenters = ["dc1"]
   type        = "service"
   priority    = 90
@@ -24,18 +24,18 @@ job "seaweedfs-csi-controller" {
       driver = "docker"
 
       config {
-        image        = "chrislusf/seaweedfs-csi-driver:v1.3.9"
+        image        = "chrislusf/s3-csi-driver:v1.3.9"
         force_pull   = true
         network_mode = "host"
         args = [
           "--endpoint=unix:///csi-sock/csi.sock",
-          "--filer=seaweedfs-filer.service.consul:8888",
+          "--filer=s3-filer.service.consul:8888",
           "--components=controller",
         ]
       }
 
       csi_plugin {
-        id        = "seaweedfs"
+        id        = "s3"
         type      = "controller"
         mount_dir = "/csi-sock"
       }

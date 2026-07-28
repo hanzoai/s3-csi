@@ -44,7 +44,7 @@ data:
     ca = "/usr/local/share/ca-certificates/ca.crt"
 
     # use this for any place needs a grpc client
-    # i.e., "weed backup|benchmark|filer.copy|filer.replicate|mount|s3|upload"
+    # i.e., "s3 backup|benchmark|filer.copy|filer.replicate|mount|s3|upload"
     [grpc.client]
     cert = "/usr/local/share/ca-certificates/tls.crt"
     key  = "/usr/local/share/ca-certificates/tls.key"
@@ -52,7 +52,7 @@ data:
 
     # volume server https options
     # Note: work in progress!
-    #     this does not work with other clients, e.g., "weed filer|mount" etc, yet.
+    #     this does not work with other clients, e.g., "s3 filer|mount" etc, yet.
     #[https.client]
     #enabled = false
     #[https.volume]

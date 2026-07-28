@@ -1,5 +1,5 @@
 # host and port of your S3 filer
-s3Filer: "SEAWEEDFS_FILER:8888"
+s3Filer: "S3_FILER:8888"
 storageClassName: s3-storage
 storageClassVolumeBindingMode: Immediate
 isDefaultStorageClass: false
@@ -164,8 +164,8 @@ node:
   mountEndpoint: ""    # defaults to mountService.endpoint
   mountSocketDir: ""   # defaults to mountService.socketDir
   mountHostPath: ""    # defaults to mountService.hostPath
-  # When s3-csi-node pod on node is recreated, all pods on same node using seaweed-csi PV will stop working.
-  # For safe update set updateStrategy.type: OnDelete and manually move pods who use seaweed-csi PV, then delete  s3-csi-node damonset pod
+  # When s3-csi-node pod on node is recreated, all pods on same node using s3-csi PV will stop working.
+  # For safe update set updateStrategy.type: OnDelete and manually move pods who use s3-csi PV, then delete  s3-csi-node damonset pod
   updateStrategy:
     type: RollingUpdate
     rollingUpdate:

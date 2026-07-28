@@ -6,13 +6,13 @@ git clone https://github.com/kubernetes-csi/csi-test.git -b v5.0.0
 cd csi-test
 make install
 
-## Start Local weed server with filer
-weed server -dir=/tmp/seaweedfs/data -s3 -volume.max=100 -volume.port=8090 -master.volumeSizeLimitMB=256
+## Start Local s3 server with filer
+s3 server -dir=/tmp/s3/data -s3 -volume.max=100 -volume.port=8090 -master.volumeSizeLimitMB=256
 
 ## Run CSI Driver
-cd ../seaweedfs-csi-driver
+cd ../s3-csi-driver
 make build
-./_output/seaweedfs-csi-driver -endpoint="$endpoint" -alsologtostderr -v=5 -filer=localhost:8888 -nodeid=test 
+./_output/s3-csi-driver -endpoint="$endpoint" -alsologtostderr -v=5 -filer=localhost:8888 -nodeid=test 
 
 # Run CSI Sanity Tests
 ../csi-test/cmd/csi-sanity/csi-sanity\

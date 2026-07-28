@@ -47,7 +47,7 @@ spec:
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           args:
             - --endpoint=$(CSI_ENDPOINT)
-            - --filer=$(SEAWEEDFS_FILER)
+            - --filer=$(S3_FILER)
             - --nodeid=$(NODE_ID)
             - --driverName=$(DRIVER_NAME)
             {{- if $mountEndpoint }}
@@ -76,7 +76,7 @@ spec:
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-            - name: SEAWEEDFS_FILER
+            - name: S3_FILER
               value: {{ .Values.s3Filer | quote }}
             - name: NODE_ID
               valueFrom:
@@ -96,15 +96,15 @@ spec:
                   fieldPath: metadata.labels['dataCenter']
             {{- end }}
             {{- if .Values.tlsSecret }}
-            - name: WEED_GRPC_CLIENT_KEY
+            - name: S3_GRPC_CLIENT_KEY
               value: /var/run/secrets/app/tls/tls.key
-            - name: WEED_GRPC_CLIENT_CERT
+            - name: S3_GRPC_CLIENT_CERT
               value: /var/run/secrets/app/tls/tls.crt
-            - name: WEED_GRPC_CA
+            - name: S3_GRPC_CA
               value: /var/run/secrets/app/tls/ca.crt
             {{- end }}
             {{- with .Values.logVerbosity }}
-            - name: WEED_V
+            - name: S3_V
               value: {{ . | quote }}
             {{- end }}
           ports:
