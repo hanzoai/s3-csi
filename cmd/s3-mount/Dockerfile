@@ -7,7 +7,7 @@
 # commit from before v1.0.2/v1.0.3/v1.0.4, which would have shipped a mount
 # binary carrying the promise-ID deadlock and the stream head-of-line stall
 # those releases fixed. Pin the TAG so it is legible and diffable against go.mod.
-ARG S3_REF=v1.0.4
+ARG S3_REF=v1.0.14
 
 FROM golang:1.26-alpine AS builder
 
