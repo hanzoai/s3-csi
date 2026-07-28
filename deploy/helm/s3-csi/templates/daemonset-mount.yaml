@@ -40,11 +40,11 @@ spec:
             - name: MOUNT_ENDPOINT
               value: {{ $mountEndpoint | quote }}
             {{- if .Values.tlsSecret }}
-            - name: WEED_GRPC_CLIENT_KEY
+            - name: S3_GRPC_CLIENT_KEY
               value: /var/run/secrets/app/tls/tls.key
-            - name: WEED_GRPC_CLIENT_CERT
+            - name: S3_GRPC_CLIENT_CERT
               value: /var/run/secrets/app/tls/tls.crt
-            - name: WEED_GRPC_CA
+            - name: S3_GRPC_CA
               value: /var/run/secrets/app/tls/ca.crt
             {{- end }}
           volumeMounts:

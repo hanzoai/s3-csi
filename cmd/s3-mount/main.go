@@ -18,7 +18,7 @@ import (
 
 var (
 	endpoint   = flag.String("endpoint", "unix:///tmp/s3-mount.sock", "endpoint the mount service listens on")
-	weedBinary = flag.String("weedBinary", mountmanager.DefaultWeedBinary, "path to the weed binary")
+	s3Binary = flag.String("s3Binary", mountmanager.DefaultS3Binary, "path to the s3 binary")
 )
 
 func main() {
@@ -45,7 +45,7 @@ func main() {
 		_ = os.Remove(address)
 	}()
 
-	manager := mountmanager.NewManager(mountmanager.Config{WeedBinary: *weedBinary})
+	manager := mountmanager.NewManager(mountmanager.Config{S3Binary: *s3Binary})
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/mount", makePostHandler(manager.Mount))

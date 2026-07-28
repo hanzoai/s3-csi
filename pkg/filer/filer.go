@@ -8,7 +8,7 @@
 // There is no RegisterHanzoFilerServer anywhere in that tree.
 //
 // So a gRPC client cannot talk to it at all — the failure mode is
-// `Unimplemented: unknown service filer_pb.SeaweedFiler`, which reads like a
+// `Unimplemented: unknown service filer_pb.S3Filer`, which reads like a
 // service-name mismatch but is really a gRPC client hitting a non-gRPC port. No
 // amount of renaming or re-addressing fixes that; the transport has to change.
 //

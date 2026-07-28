@@ -18,9 +18,9 @@ import (
 
 var kubeMounter = mount.New("")
 
-// Manager owns weed mount processes and exposes helpers to start and stop them.
+// Manager owns s3 mount processes and exposes helpers to start and stop them.
 type Manager struct {
-	weedBinary string
+	s3Binary string
 
 	mu     sync.Mutex
 	mounts map[string]*mountEntry
@@ -29,23 +29,23 @@ type Manager struct {
 
 // Config configures a Manager instance.
 type Config struct {
-	WeedBinary string
+	S3Binary string
 }
 
 // NewManager returns a Manager ready to accept mount requests.
 func NewManager(cfg Config) *Manager {
-	binary := cfg.WeedBinary
+	binary := cfg.S3Binary
 	if binary == "" {
-		binary = DefaultWeedBinary
+		binary = DefaultS3Binary
 	}
 	return &Manager{
-		weedBinary: binary,
+		s3Binary: binary,
 		mounts:     make(map[string]*mountEntry),
 		locks:      newKeyMutex(),
 	}
 }
 
-// Mount starts a weed mount process using the provided request.
+// Mount starts a s3 mount process using the provided request.
 func (m *Manager) Mount(req *MountRequest) (*MountResponse, error) {
 	if req == nil {
 		return nil, errors.New("mount request is nil")
@@ -59,14 +59,14 @@ func (m *Manager) Mount(req *MountRequest) (*MountResponse, error) {
 	defer lock.Unlock()
 
 	if entry := m.getMount(req.VolumeID); entry != nil {
-		// If the previous weed mount process has died, the entry is
+		// If the previous s3 mount process has died, the entry is
 		// stale and the FUSE mount is dead. Tear down the stale entry
 		// so we can start a fresh process; otherwise we would falsely
 		// report "already mounted" and a CSI-driver recovery would
 		// silently bind-mount onto a dead path. See s3/s3-csi#261.
 		select {
 		case <-entry.process.exited:
-			glog.Warningf("volume %s previous weed mount process has exited; replacing stale entry with a fresh mount", req.VolumeID)
+			glog.Warningf("volume %s previous s3 mount process has exited; replacing stale entry with a fresh mount", req.VolumeID)
 			// Wait for wait()'s post-exit cleanup (FUSE unmount) to finish
 			// so ensureTargetClean below sees a quiescent path.
 			<-entry.process.done
@@ -89,18 +89,18 @@ func (m *Manager) Mount(req *MountRequest) (*MountResponse, error) {
 	m.mounts[req.VolumeID] = entry
 	m.mu.Unlock()
 
-	// Proactively clear the entry once the weed mount process exits,
+	// Proactively clear the entry once the s3 mount process exits,
 	// even if Unmount is never called. Without this, a process that
 	// crashes on its own (e.g. backend errors) leaves a stale entry
 	// that fools later Mount calls into reporting success without
 	// starting a new process.
 	go m.watchProcessExit(req.VolumeID, entry)
 
-	glog.Infof("started weed mount process for volume %s at %s", req.VolumeID, req.TargetPath)
+	glog.Infof("started s3 mount process for volume %s at %s", req.VolumeID, req.TargetPath)
 	return &MountResponse{LocalSocket: entry.localSocket}, nil
 }
 
-// watchProcessExit removes the entry for volumeID once its weed mount
+// watchProcessExit removes the entry for volumeID once its s3 mount
 // process has finished exiting. It is safe to run concurrently with
 // Unmount: if Unmount has already removed the entry (or replaced it
 // with a fresh mount), the identity check ensures we leave the new
@@ -113,11 +113,11 @@ func (m *Manager) watchProcessExit(volumeID string, entry *mountEntry) {
 		delete(m.mounts, volumeID)
 		// See removeMount: do not delete the per-volume lock — a
 		// concurrent Mount/Unmount may still be holding it.
-		glog.Infof("removed mount entry for volume %s after weed mount process exited (target: %s)", volumeID, entry.targetPath)
+		glog.Infof("removed mount entry for volume %s after s3 mount process exited (target: %s)", volumeID, entry.targetPath)
 	}
 }
 
-// Unmount terminates the weed mount process associated with the provided request.
+// Unmount terminates the s3 mount process associated with the provided request.
 func (m *Manager) Unmount(req *UnmountRequest) (*UnmountResponse, error) {
 	if req == nil {
 		return nil, errors.New("unmount request is nil")
@@ -137,7 +137,7 @@ func (m *Manager) Unmount(req *UnmountRequest) (*UnmountResponse, error) {
 		return &UnmountResponse{}, nil
 	}
 
-	// Note: We don't explicitly unmount here because weedMountProcess.wait()
+	// Note: We don't explicitly unmount here because s3MountProcess.wait()
 	// handles the unmount when the process terminates (either gracefully or forcefully).
 	// This centralizes unmount logic and avoids potential race conditions.
 	if err := entry.process.stop(); err != nil {
@@ -152,7 +152,7 @@ func (m *Manager) Unmount(req *UnmountRequest) (*UnmountResponse, error) {
 	// Only remove from state after all cleanup operations succeeded
 	m.removeMount(req.VolumeID)
 
-	glog.Infof("stopped weed mount process for volume %s at %s", req.VolumeID, entry.targetPath)
+	glog.Infof("stopped s3 mount process for volume %s at %s", req.VolumeID, entry.targetPath)
 	return &UnmountResponse{}, nil
 }
 
@@ -201,7 +201,7 @@ func (m *Manager) startMount(req *MountRequest) (*mountEntry, error) {
 		return nil, errors.New("mountArgs is required")
 	}
 
-	process, err := startWeedMountProcess(m.weedBinary, args, targetPath, req.VolumeID)
+	process, err := startS3MountProcess(m.s3Binary, args, targetPath, req.VolumeID)
 	if err != nil {
 		return nil, err
 	}
@@ -264,14 +264,14 @@ type mountEntry struct {
 	targetPath  string
 	cacheDir    string
 	localSocket string
-	process     *weedMountProcess
+	process     *s3MountProcess
 }
 
-type weedMountProcess struct {
+type s3MountProcess struct {
 	cmd    *exec.Cmd
 	target string
 	// exited is closed as soon as cmd.Wait() returns, so callers can
-	// detect that the weed mount process is gone without waiting for
+	// detect that the s3 mount process is gone without waiting for
 	// the post-exit FUSE unmount step.
 	exited chan struct{}
 	// done is closed after wait() finishes its full cleanup (including
@@ -279,7 +279,7 @@ type weedMountProcess struct {
 	done chan struct{}
 }
 
-func startWeedMountProcess(command string, args []string, target string, volumeID string) (*weedMountProcess, error) {
+func startS3MountProcess(command string, args []string, target string, volumeID string) (*s3MountProcess, error) {
 	cmd := exec.Command(command, args...)
 
 	// Capture stdout/stderr and log with volume ID prefix for better debugging
@@ -292,17 +292,17 @@ func startWeedMountProcess(command string, args []string, target string, volumeI
 		return nil, fmt.Errorf("creating stderr pipe: %w", err)
 	}
 
-	glog.V(0).Infof("[%s] Starting weed mount: %s %s", volumeID, command, strings.Join(args, " "))
+	glog.V(0).Infof("[%s] Starting s3 mount: %s %s", volumeID, command, strings.Join(args, " "))
 
 	if err := cmd.Start(); err != nil {
-		return nil, fmt.Errorf("starting weed mount: %w", err)
+		return nil, fmt.Errorf("starting s3 mount: %w", err)
 	}
 
 	// Forward stdout/stderr with volume ID prefix for better debugging
 	go forwardLogs(stdoutPipe, volumeID, "stdout")
 	go forwardLogs(stderrPipe, volumeID, "stderr")
 
-	process := &weedMountProcess{
+	process := &s3MountProcess{
 		cmd:    cmd,
 		target: target,
 		exited: make(chan struct{}),
@@ -321,11 +321,11 @@ func startWeedMountProcess(command string, args []string, target string, volumeI
 	return process, nil
 }
 
-func (p *weedMountProcess) wait() {
+func (p *s3MountProcess) wait() {
 	if err := p.cmd.Wait(); err != nil {
-		glog.Errorf("weed mount exit (pid: %d, target: %s): %v", p.cmd.Process.Pid, p.target, err)
+		glog.Errorf("s3 mount exit (pid: %d, target: %s): %v", p.cmd.Process.Pid, p.target, err)
 	} else {
-		glog.Infof("weed mount exit (pid: %d, target: %s)", p.cmd.Process.Pid, p.target)
+		glog.Infof("s3 mount exit (pid: %d, target: %s)", p.cmd.Process.Pid, p.target)
 	}
 
 	// Signal exit immediately so Manager.Mount can detect a dead
@@ -339,9 +339,9 @@ func (p *weedMountProcess) wait() {
 	close(p.done)
 }
 
-func (p *weedMountProcess) stop() error {
+func (p *s3MountProcess) stop() error {
 	if err := p.cmd.Process.Signal(syscall.SIGTERM); err != nil {
-		glog.Warningf("sending SIGTERM to weed mount failed: %v", err)
+		glog.Warningf("sending SIGTERM to s3 mount failed: %v", err)
 	}
 
 	select {
@@ -351,14 +351,14 @@ func (p *weedMountProcess) stop() error {
 	}
 
 	if err := p.cmd.Process.Kill(); err != nil {
-		glog.Warningf("killing weed mount failed: %v", err)
+		glog.Warningf("killing s3 mount failed: %v", err)
 	}
 
 	select {
 	case <-p.done:
 		return nil
 	case <-time.After(1 * time.Second):
-		return errors.New("timed out waiting for weed mount to stop")
+		return errors.New("timed out waiting for s3 mount to stop")
 	}
 }
 

@@ -8,11 +8,11 @@ fi
 
 VERSION=${2:-latest}
 ARCH=${5:-linux/amd64}
-PLUGIN_NAME=${4:-swarm-csi-swaweedfs}
+PLUGIN_NAME=${4:-swarm-csi-swas3fs}
 PLUGIN_TAG=${3:-v1.2.0}
 PREFIX=${1:-gradlon}
 
-docker build --platform ${ARCH} --build-arg BASE_IMAGE=chrislusf/seaweedfs-csi-driver:${VERSION} --build-arg ARCH=$ARCH -t seawadd-csi_tmp_img .
+docker build --platform ${ARCH} --build-arg BASE_IMAGE=chrislusf/s3-csi-driver:${VERSION} --build-arg ARCH=$ARCH -t seawadd-csi_tmp_img .
 mkdir -p ./plugin/rootfs
 cp config.json ./plugin/
 docker container create --name seawadd-csi_tmp seawadd-csi_tmp_img 
