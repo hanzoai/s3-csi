@@ -88,7 +88,7 @@ jobs:
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          file: ./cmd/s3-csi/Dockerfile
+          file: ./cmd/s3-csi-driver/Dockerfile
           platforms: linux/amd64, linux/arm, linux/arm64, linux/386
           tags: ${{ steps.docker_meta_csi.outputs.tags }}
           labels: ${{ steps.docker_meta_csi.outputs.labels }}
