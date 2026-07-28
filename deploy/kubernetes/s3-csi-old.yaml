@@ -299,7 +299,7 @@ spec:
               mountPath: /var/lib/csi/sockets/pluginproxy/
         # S3 Plugin
         - name: s3-csi-plugin
-          image: chrislusf/s3-csi:latest
+          image: ghcr.io/hanzoai/s3-csi:latest
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--filer=$(S3_FILER)"
@@ -379,7 +379,7 @@ spec:
             capabilities:
               add: ["SYS_ADMIN"]
             allowPrivilegeEscalation: true
-          image: chrislusf/s3-csi:latest
+          image: ghcr.io/hanzoai/s3-csi:latest
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--filer=$(S3_FILER)"
