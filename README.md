@@ -1,11 +1,11 @@
 # Container Storage Interface (CSI) for S3
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/chrislusf/s3-csi-driver.svg?maxAge=4800)](https://hub.docker.com/r/chrislusf/s3-csi-driver/)
-[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/s3-csi-driver)](https://artifacthub.io/packages/search?repo=s3-csi-driver)
+[![Docker Pulls](https://img.shields.io/docker/pulls/chrislusf/seaweedfs-csi-driver.svg?maxAge=4800)](https://hub.docker.com/r/chrislusf/seaweedfs-csi-driver/)
+[![Artifact Hub](https://img.shields.io/endpoint?url=https://artifacthub.io/badge/repository/seaweedfs-csi-driver)](https://artifacthub.io/packages/search?repo=seaweedfs-csi-driver)
 
 [Container storage interface](https://kubernetes-csi.github.io/docs/) is an [industry standard](https://github.com/container-storage-interface/spec/blob/master/spec.md) that enables storage vendors to develop a plugin once and have it work across a number of container orchestration systems.
 
-[S3](https://github.com/s3/s3) is a simple and highly scalable distributed file system, to store and serve billions of files fast!
+[S3](https://github.com/hanzoai/s3) is a simple and highly scalable distributed file system, to store and serve billions of files fast!
 
 <br>
 
@@ -34,16 +34,16 @@
 1. Add the helm repo;
 
 ```sh
-helm repo add s3-csi-driver https://s3.github.io/s3-csi-driver/helm
+helm repo add s3-csi https://hanzoai.github.io/s3-csi/helm
 ```
 
-2. Check versions by `helm repo update s3-csi-driver` and `helm search repo s3-csi-driver`
+2. Check versions by `helm repo update s3-csi` and `helm search repo s3-csi`
 
 #### Source
 
 1. Clone this repository 
 ```sh
-git clone https://github.com/s3/s3-csi-driver.git
+git clone https://github.com/hanzoai/s3-csi.git
 ```
 
 2. Adjust your S3 Filer address via variable S3_FILER in `deploy/kubernetes/s3-csi.yaml` (2 places)
@@ -53,7 +53,7 @@ git clone https://github.com/s3/s3-csi-driver.git
 ### To generate an up to date manifest from the helm chart, do:
 
 ```
-$ helm template s3 ./deploy/helm/s3-csi-driver > deploy/kubernetes/s3-csi.yaml
+$ helm template s3 ./deploy/helm/s3-csi > deploy/kubernetes/s3-csi.yaml
 ```
 Check the kubelet root directory ,Execute the following command
 ```
@@ -89,15 +89,15 @@ $ kubectl delete -f deploy/kubernetes/s3-csi.yaml
 
 1. Clone project
 ```bash
-git clone https://github.com/s3/s3-csi-driver.git
+git clone https://github.com/hanzoai/s3-csi.git
 ```
-2. Edit `./deploy/helm/s3-csi-driver/values.yaml` if required and Install
+2. Edit `./deploy/helm/s3-csi/values.yaml` if required and Install
 ```bash
-helm install --set s3Filer=<filerHost:port> s3-csi-driver ./deploy/helm/s3-csi-driver
+helm install --set s3Filer=<filerHost:port> s3-csi-driver ./deploy/helm/s3-csi
 ```
 Example with multiple filers :
 ```bash
-helm install s3-csi-driver ./deploy/helm/s3-csi-driver/ \
+helm install s3-csi-driver ./deploy/helm/s3-csi/ \
   --namespace s3-csi-driver \
   --set s3Filer="<filerHost:port>\,<filerHost:port>\,<filerHost:port>\,<filerHost:port>\,<filerHost:port>"
 ```

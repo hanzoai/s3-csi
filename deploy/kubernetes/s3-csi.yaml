@@ -215,7 +215,7 @@ spec:
               add:
               - SYS_ADMIN
             privileged: true
-          image: chrislusf/s3-mount:v1.4.5
+          image: ghcr.io/hanzoai/s3-mount:v1.4.5
           imagePullPolicy: IfNotPresent
           args:
             - --endpoint=$(MOUNT_ENDPOINT)
@@ -289,7 +289,7 @@ spec:
               add:
               - SYS_ADMIN
             privileged: true
-          image: chrislusf/s3-csi:v1.4.5
+          image: ghcr.io/hanzoai/s3-csi:v1.4.5
           imagePullPolicy: IfNotPresent
           args:
             - --endpoint=$(CSI_ENDPOINT)
@@ -450,7 +450,7 @@ spec:
       containers:
         # S3 Plugin (controller)
         - name: s3-csi-plugin
-          image: chrislusf/s3-csi:v1.4.5
+          image: ghcr.io/hanzoai/s3-csi:v1.4.5
           imagePullPolicy: IfNotPresent
           args :
             - --endpoint=$(CSI_ENDPOINT)

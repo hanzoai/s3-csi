@@ -91,7 +91,7 @@ csiLivenessProbe:
   resources: {}
 
 s3CsiPlugin:
-  image: chrislusf/s3-csi
+  image: ghcr.io/hanzoai/s3-csi
   # tag defaults to Chart.appVersion when not set
   securityContext:
     privileged: true
@@ -108,7 +108,7 @@ s3CsiPlugin:
 mountService:
   # Must be enabled for the CSI driver node component to mount volumes
   enabled: true
-  image: chrislusf/s3-mount
+  image: ghcr.io/hanzoai/s3-mount
   # tag defaults to Chart.appVersion when not set
   # Endpoint for communication between CSI driver and mount service
   endpoint: unix:///var/lib/s3-mount/s3-mount.sock
