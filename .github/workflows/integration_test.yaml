@@ -158,8 +158,22 @@ jobs:
           # queries it — otherwise kubectl wait races kubectl apply and exits with
           # "no matching resources found".
           echo "Waiting for S3 to be ready..."
-          kubectl rollout status deployment/s3 -n s3 --timeout=180s
-          kubectl wait --for=condition=ready pod -l app=s3 -n s3 --timeout=180s
+          kubectl rollout status deployment/s3 -n s3 --timeout=180s || true
+          if ! kubectl wait --for=condition=ready pod -l app=s3 -n s3 --timeout=180s; then
+            # The pod never came up. Print why, rather than leaving a bare
+            # "timed out waiting for the condition" that says nothing about
+            # the container's own failure.
+            echo "::group::s3 did not become ready"
+            kubectl -n s3 describe pod -l app=s3 || true
+            echo '--- current container log ---'
+            kubectl -n s3 logs -l app=s3 --tail=200 || true
+            echo '--- previous container log (the crash, if it restarted) ---'
+            kubectl -n s3 logs -l app=s3 --previous --tail=200 || true
+            echo '--- events ---'
+            kubectl -n s3 get events --sort-by=.lastTimestamp | tail -40 || true
+            echo "::endgroup::"
+            exit 1
+          fi
           kubectl get pods -n s3
           
           # Brief additional wait for internal services to stabilize
