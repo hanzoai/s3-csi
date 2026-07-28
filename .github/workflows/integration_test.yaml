@@ -65,11 +65,11 @@ jobs:
           # the rollout. Retry the docker pull a few times to ride through
           # transient registry hiccups.
           for i in 1 2 3; do
-            docker pull ghcr.io/hanzoai/s3:v1.0.2 && break
+            docker pull ghcr.io/hanzoai/s3:4.34.6 && break
             echo "docker pull attempt $i failed, retrying..."
             sleep 10
           done
-          kind load docker-image ghcr.io/hanzoai/s3:v1.0.2 --name csi-test
+          kind load docker-image ghcr.io/hanzoai/s3:4.34.6 --name csi-test
 
       - name: Deploy S3
         run: |
@@ -117,7 +117,7 @@ jobs:
               spec:
                 containers:
                   - name: s3
-                    image: ghcr.io/hanzoai/s3:v1.0.2
+                    image: ghcr.io/hanzoai/s3:4.34.6
                     # Use the image preloaded into kind by the workflow so we
                     # do not re-pull from Docker Hub (anonymous rate limits
                     # have caused ImagePullBackOff in CI).
