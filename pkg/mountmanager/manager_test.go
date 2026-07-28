@@ -6,7 +6,7 @@ import (
 )
 
 // TestWatchProcessExitRemovesStaleEntry verifies that the manager's
-// background watcher clears a mount entry from its map when the weed
+// background watcher clears a mount entry from its map when the s3
 // mount process exits on its own. Without this, a future Mount call for
 // the same volume would falsely receive an "already mounted" no-op
 // because the manager's state never noticed the dead process.
@@ -14,7 +14,7 @@ import (
 func TestWatchProcessExitRemovesStaleEntry(t *testing.T) {
 	m := NewManager(Config{})
 
-	process := &weedMountProcess{
+	process := &s3MountProcess{
 		target: "/tmp/test-target",
 		exited: make(chan struct{}),
 		done:   make(chan struct{}),
@@ -35,7 +35,7 @@ func TestWatchProcessExitRemovesStaleEntry(t *testing.T) {
 		t.Fatalf("expected entry tracked before process exit, got %v", got)
 	}
 
-	// Simulate the weed mount process dying.
+	// Simulate the s3 mount process dying.
 	close(process.exited)
 	close(process.done)
 
@@ -47,7 +47,7 @@ func TestWatchProcessExitRemovesStaleEntry(t *testing.T) {
 		}
 		time.Sleep(10 * time.Millisecond)
 	}
-	t.Fatal("watcher did not remove stale entry after weed mount process exited")
+	t.Fatal("watcher did not remove stale entry after s3 mount process exited")
 }
 
 // TestWatchProcessExitLeavesReplacedEntry verifies that if a fresh
@@ -58,7 +58,7 @@ func TestWatchProcessExitRemovesStaleEntry(t *testing.T) {
 func TestWatchProcessExitLeavesReplacedEntry(t *testing.T) {
 	m := NewManager(Config{})
 
-	oldProcess := &weedMountProcess{
+	oldProcess := &s3MountProcess{
 		target: "/tmp/test-target",
 		exited: make(chan struct{}),
 		done:   make(chan struct{}),
@@ -68,7 +68,7 @@ func TestWatchProcessExitLeavesReplacedEntry(t *testing.T) {
 		process:  oldProcess,
 	}
 
-	newProcess := &weedMountProcess{
+	newProcess := &s3MountProcess{
 		target: "/tmp/test-target",
 		exited: make(chan struct{}),
 		done:   make(chan struct{}),

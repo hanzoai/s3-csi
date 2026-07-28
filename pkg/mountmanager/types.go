@@ -1,6 +1,6 @@
 package mountmanager
 
-// MountRequest contains all information needed to start a weed mount process.
+// MountRequest contains all information needed to start a s3 mount process.
 type MountRequest struct {
 	VolumeID    string   `json:"volumeId"`
 	TargetPath  string   `json:"targetPath"`
@@ -14,7 +14,7 @@ type MountResponse struct {
 	LocalSocket string `json:"localSocket"`
 }
 
-// UnmountRequest contains the information needed to stop a weed mount process.
+// UnmountRequest contains the information needed to stop a s3 mount process.
 type UnmountRequest struct {
 	VolumeID string `json:"volumeId"`
 }
@@ -28,6 +28,6 @@ type ErrorResponse struct {
 }
 
 const (
-	// DefaultWeedBinary is the default executable name used to spawn weed mount processes.
-	DefaultWeedBinary = "weed"
+	// DefaultS3Binary is the default executable name used to spawn s3 mount processes.
+	DefaultS3Binary = "s3"
 )

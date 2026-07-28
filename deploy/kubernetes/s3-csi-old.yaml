@@ -302,28 +302,28 @@ spec:
           image: chrislusf/s3-csi:latest
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
-            - "--filer=$(SEAWEEDFS_FILER)"
+            - "--filer=$(S3_FILER)"
             - "--nodeid=$(NODE_ID)"
-            - "--cacheCapacityMB=$(SEAWEEDFS_CACHE_CAPACITY_MB)"
-            - "--cacheDir=$(SEAWEEDFS_CACHE_DIR)"
-            - "--map.uid=$(SEAWEEDFS_MAP_UID)"
-            - "--map.gid=$(SEAWEEDFS_MAP_GID)"
+            - "--cacheCapacityMB=$(S3_CACHE_CAPACITY_MB)"
+            - "--cacheDir=$(S3_CACHE_DIR)"
+            - "--map.uid=$(S3_MAP_UID)"
+            - "--map.gid=$(S3_MAP_GID)"
           env:
             - name: CSI_ENDPOINT
               value: unix:///var/lib/csi/sockets/pluginproxy/csi.sock
-            - name: SEAWEEDFS_FILER
+            - name: S3_FILER
               value: "192.168.2.7:8888" # host and port of your S3 filer
             - name: NODE_ID
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            - name: SEAWEEDFS_CACHE_CAPACITY_MB
+            - name: S3_CACHE_CAPACITY_MB
               value: "1000"
-            - name: SEAWEEDFS_CACHE_DIR
+            - name: S3_CACHE_DIR
               value: /tmp
-            - name: SEAWEEDFS_MAP_UID
+            - name: S3_MAP_UID
               value: ""
-            - name: SEAWEEDFS_MAP_GID
+            - name: S3_MAP_GID
               value: ""
           imagePullPolicy: "Always"
           volumeMounts:
@@ -382,28 +382,28 @@ spec:
           image: chrislusf/s3-csi:latest
           args :
             - "--endpoint=$(CSI_ENDPOINT)"
-            - "--filer=$(SEAWEEDFS_FILER)"
+            - "--filer=$(S3_FILER)"
             - "--nodeid=$(NODE_ID)"
-            - "--cacheCapacityMB=$(SEAWEEDFS_CACHE_CAPACITY_MB)"
-            - "--cacheDir=$(SEAWEEDFS_CACHE_DIR)"
-            - "--map.uid=$(SEAWEEDFS_MAP_UID)"
-            - "--map.gid=$(SEAWEEDFS_MAP_GID)"
+            - "--cacheCapacityMB=$(S3_CACHE_CAPACITY_MB)"
+            - "--cacheDir=$(S3_CACHE_DIR)"
+            - "--map.uid=$(S3_MAP_UID)"
+            - "--map.gid=$(S3_MAP_GID)"
           env:
             - name: CSI_ENDPOINT
               value: unix:///csi/csi.sock
-            - name: SEAWEEDFS_FILER
-              value: "192.168.2.7:8888" # host and port of your S3 filer, could also be K8S DNS entry like s3-filer.seaweed-namespace.svc:8888
+            - name: S3_FILER
+              value: "192.168.2.7:8888" # host and port of your S3 filer, could also be K8S DNS entry like s3-filer.s3-namespace.svc:8888
             - name: NODE_ID
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
-            - name: SEAWEEDFS_CACHE_CAPACITY_MB
+            - name: S3_CACHE_CAPACITY_MB
               value: "1000"
-            - name: SEAWEEDFS_CACHE_DIR
+            - name: S3_CACHE_DIR
               value: /tmp
-            - name: SEAWEEDFS_MAP_UID
+            - name: S3_MAP_UID
               value: ""
-            - name: SEAWEEDFS_MAP_GID
+            - name: S3_MAP_GID
               value: ""
           imagePullPolicy: "IfNotPresent"
           volumeMounts:

@@ -1,6 +1,6 @@
-# SeaweedFS CSI-Driver Docker Plugin
+# S3 CSI-Driver Docker Plugin
 
-This Docker plugin integrates the SeaweedFS CSI-Driver with Docker. It allows you to use SeaweedFS as a volume driver in Docker environments.
+This Docker plugin integrates the S3 CSI-Driver with Docker. It allows you to use S3 as a volume driver in Docker environments.
 
 ## Environment Variables
 
@@ -24,14 +24,14 @@ This Docker plugin integrates the SeaweedFS CSI-Driver with Docker. It allows yo
 ## Usage
 
 ```bash
-docker plugin install --disable --alias seaweedfs-csi:swarm --grant-all-permissions gradlon/swarm-csi-swaweedfs:v1.2.0
-docker plugin set seaweedfs-csi:swarm FILER=<IP>:8888,<IP>:8888
-docker plugin set seaweedfs-csi:swarm CACHE_SIZE=512
-docker plugin enable seaweedfs-csi:swarm
-docker volume create --driver seaweedfs-csi:swarm --availability active --scope single --sharing none  --type mount --opt path="/docker/volumes/teste1" test-volume
+docker plugin install --disable --alias s3-csi:swarm --grant-all-permissions gradlon/swarm-csi-swas3fs:v1.2.0
+docker plugin set s3-csi:swarm FILER=<IP>:8888,<IP>:8888
+docker plugin set s3-csi:swarm CACHE_SIZE=512
+docker plugin enable s3-csi:swarm
+docker volume create --driver s3-csi:swarm --availability active --scope single --sharing none  --type mount --opt path="/docker/volumes/teste1" test-volume
 
 docker volume create \
-  --driver seaweedfs-csi:swarm \
+  --driver s3-csi:swarm \
   --availability active \
   --scope multi \
   --sharing all \
@@ -43,7 +43,7 @@ docker volume create \
 
 ## Build Guide
 
-Follow these steps to build the SeaweedFS CSI-Driver Docker plugin:
+Follow these steps to build the S3 CSI-Driver Docker plugin:
 
 ```bash
 #!/bin/bash
@@ -56,11 +56,11 @@ fi
 
 VERSION=${2:-latest}
 ARCH=${5:-linux/amd64}
-PLUGIN_NAME=${4:-swarm-csi-swaweedfs}
+PLUGIN_NAME=${4:-swarm-csi-swas3fs}
 PLUGIN_TAG=${3:-v1.2.0}
 PREFIX=${1:-gradlon}
 
-docker build --platform ${ARCH} --build-arg BASE_IMAGE=chrislusf/seaweedfs-csi-driver:${VERSION} --build-arg ARCH=$ARCH -t seawadd-csi_tmp_img .
+docker build --platform ${ARCH} --build-arg BASE_IMAGE=chrislusf/s3-csi-driver:${VERSION} --build-arg ARCH=$ARCH -t seawadd-csi_tmp_img .
 mkdir -p ./plugin/rootfs
 cp config.json ./plugin/
 docker container create --name seawadd-csi_tmp seawadd-csi_tmp_img 
@@ -68,11 +68,11 @@ docker container export seawadd-csi_tmp | tar -x -C ./plugin/rootfs
 docker container rm -vf seawadd-csi_tmp 
 docker image rm seawadd-csi_tmp_img 
 
-docker plugin disable ${PREFIX}/swarm-csi-swaweedfs:v1.2.0
+docker plugin disable ${PREFIX}/swarm-csi-swas3fs:v1.2.0
 docker plugin rm ${PREFIX}/${PLUGIN_NAME}:${PLUGIN_TAG} 2> /dev/null || true
 docker plugin create ${PREFIX}/${PLUGIN_NAME}:${PLUGIN_TAG} ./plugin
 docker plugin push ${PREFIX}/${PLUGIN_NAME}:${PLUGIN_TAG}
 rm -rf ./plugin/
 ```
 
-Volumes are store in the "/buckets" folder on the Seaweed server.
+Volumes are store in the "/buckets" folder on the S3 server.
