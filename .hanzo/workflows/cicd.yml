@@ -1,0 +1,18 @@
+name: CI/CD
+# The ONE pipeline for s3-csi, on our own runners against git.hanzo.ai.
+#
+# THE LAW: this repo has no .github/workflows. Everything that gates, builds or
+# deploys lives here, and every real detail lives in the repo-root hanzo.yml so
+# platform.hanzo.ai reads the same declaration this pipeline does.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  gate:
+    uses: hanzoai/ci/.hanzo/workflows/build.yml@v2
+    secrets: inherit

@@ -1,0 +1,27 @@
+# Canonical CI config for hanzoai/s3-csi — read by the hanzoai/ci reusable
+# (.hanzo/workflows/cicd.yml) and by platform.hanzo.ai. One file, one place.
+#
+# This replaces three GitHub workflows that each built THE SAME two images
+# (dev.yaml, release.yaml, versioned_release.yaml). Three builders on one commit
+# is three chances to publish something nobody asked for; the images: block below
+# is the single declaration of what this repo produces.
+images:
+  - name: s3-csi
+    context: .
+    dockerfile: cmd/s3-csi-driver/Dockerfile
+    repo: ghcr.io/hanzoai/s3-csi
+
+  - name: s3-mount
+    context: .
+    dockerfile: cmd/s3-mount/Dockerfile
+    repo: ghcr.io/hanzoai/s3-mount
+
+test:
+  - name: go
+    # The driver's storage path talks ZAP to the filer; keep it building and its
+    # unit tests honest before anything is published.
+    run: |
+      set -e
+      export GOPRIVATE='github.com/hanzoai/*' GOWORK=off
+      go vet ./...
+      go test ./...
