@@ -115,6 +115,11 @@ jobs:
                 labels:
                   app: s3
               spec:
+                # Kubernetes injects S3_PORT=tcp://<clusterIP>:<port> for the
+                # Service named 's3' in this namespace, and this binary reads
+                # S3_PORT as its 's3.port' config -- which fails to parse as an
+                # int and exits 2. Production avoids it only by passing -s3.port.
+                enableServiceLinks: false
                 containers:
                   - name: s3
                     image: ghcr.io/hanzoai/s3:4.34.6
@@ -129,6 +134,7 @@ jobs:
                       - -filer
                       - -volume.max=10
                       - -master.volumeSizeLimitMB=16
+                      - -s3.port=8333
                     ports:
                       - containerPort: 9333
                       - containerPort: 8080
@@ -164,10 +170,14 @@ jobs:
             # the container's own failure.
             echo "::group::s3 did not become ready"
             kubectl -n s3 describe pod -l app=s3 || true
-            echo '--- current container log ---'
-            kubectl -n s3 logs -l app=s3 --tail=200 || true
-            echo '--- previous container log (the crash, if it restarted) ---'
-            kubectl -n s3 logs -l app=s3 --previous --tail=200 || true
+            # HEAD first: a startup rejection prints its reason on line 1 and then
+            # dumps hundreds of lines of usage, so --tail alone hides the cause.
+            echo '--- container log HEAD ---'
+            kubectl -n s3 logs -l app=s3 2>/dev/null | head -30 || true
+            echo '--- container log TAIL ---'
+            kubectl -n s3 logs -l app=s3 --tail=40 || true
+            echo '--- previous container log HEAD (the crash, if it restarted) ---'
+            kubectl -n s3 logs -l app=s3 --previous 2>/dev/null | head -30 || true
             echo '--- events ---'
             kubectl -n s3 get events --sort-by=.lastTimestamp | tail -40 || true
             echo "::endgroup::"
