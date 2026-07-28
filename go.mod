@@ -1,6 +1,6 @@
 module github.com/hanzoai/s3-csi
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/container-storage-interface/spec v1.11.0
@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/hanzoai/s3 v1.0.4-0.20260728034919-7c7bb588e41e
+	github.com/hanzoai/s3 v1.0.4
 	golang.org/x/sys v0.47.0
 	k8s.io/api v0.32.0
 	k8s.io/apimachinery v0.32.0
@@ -63,7 +63,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/viant/ptrie v1.0.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	github.com/zap-proto/go v1.8.1 // indirect
+	github.com/zap-proto/go v1.8.2 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/image v0.43.0 // indirect
