@@ -41,7 +41,7 @@ jobs:
 
       - name: Build CSI driver
         run: |
-          go build -o _output/s3-csi ./cmd/s3-csi
+          go build -o _output/s3-csi ./cmd/s3-csi-driver
           go build -o _output/s3-mount ./cmd/s3-mount
 
       - name: Create kind cluster
