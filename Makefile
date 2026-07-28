@@ -24,7 +24,7 @@ $(OUTPUT_DIR):
 	mkdir -p $@
 
 $(DRIVER_BINARY): | $(OUTPUT_DIR)
-	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '$(LDFLAGS)' -o $@ ./cmd/s3-csi/main.go
+	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '$(LDFLAGS)' -o $@ ./cmd/s3-csi-driver/main.go
 
 $(MOUNT_BINARY): | $(OUTPUT_DIR)
 	CGO_ENABLED=0 GOOS=linux go build -a -ldflags '$(LDFLAGS)' -o $@ ./cmd/s3-mount/main.go
@@ -32,7 +32,7 @@ $(MOUNT_BINARY): | $(OUTPUT_DIR)
 container: container-csi container-mount
 
 container-csi: $(DRIVER_BINARY)
-	docker build -t $(DRIVER_IMAGE_TAG) -f cmd/s3-csi/Dockerfile.dev .
+	docker build -t $(DRIVER_IMAGE_TAG) -f cmd/s3-csi-driver/Dockerfile.dev .
 
 container-mount: $(MOUNT_BINARY)
 	docker build -t $(MOUNT_IMAGE_TAG) -f cmd/s3-mount/Dockerfile.dev .
