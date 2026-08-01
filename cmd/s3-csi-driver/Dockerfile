@@ -1,4 +1,5 @@
 FROM golang:1.26-alpine as builder
+ENV GOTOOLCHAIN=auto
 
 RUN apk add git g++
 
