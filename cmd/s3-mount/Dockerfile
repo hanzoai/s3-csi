@@ -10,6 +10,7 @@
 ARG S3_REF=v1.0.14
 
 FROM golang:1.26-alpine AS builder
+ENV GOTOOLCHAIN=auto
 
 RUN apk add git g++
 
