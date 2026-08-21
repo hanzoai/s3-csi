@@ -1,19 +1,25 @@
 name: "helm: lint and test charts"
 
+# `main`, not `master`. This file came across from .github/workflows carrying
+# upstream's branch name; this repo has no master, so the lane has never fired
+# once — it produced no run to go red, which is why nobody noticed.
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths: ['deploy/helm/s3-csi/**']
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
     paths: ['deploy/helm/s3-csi/**']
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   lint-test:
-    runs-on: ubuntu-latest
+    # NOT ubuntu-latest. This fleet declares no ubuntu-* label on purpose, and an
+    # unmatched label does not fail — it queues until the job timeout.
+    runs-on: hanzo-build-linux-amd64
     steps:
       - name: Checkout
         uses: actions/checkout@v4
